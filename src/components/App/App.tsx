@@ -2,9 +2,9 @@ import React, { useState, useEffect, createContext } from 'react';
 import logo from './logo.svg';
 import './App';
 import styles from './App.module.css';
-import BurgerIngredients from '../BurgerIngredients/burgerIngredients';
-import BurgerConstructor from '../BurgerConstructor/burgerConstructor';
-import AppHeader from '../AppHeader/appHeader';
+import BurgerIngredients from '../BurgerIngredients/BurgerIngredients';
+import BurgerConstructor from '../BurgerConstructor/BurgerConstructor';
+import AppHeader from '../AppHeader/AppHeader';
 import { BrowserRouter } from 'react-router-dom';
 import { dataPath } from '../../constant';
 
