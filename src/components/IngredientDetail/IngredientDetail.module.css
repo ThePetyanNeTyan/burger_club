@@ -1,0 +1,44 @@
+.main {
+    background: rgba(223, 44, 44, 0);
+    position: relative;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.main__img {
+    cursor: pointer;
+}
+
+.about {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1 1 1 1;
+}
+
+.top {
+    display: flex;
+    align-items: center;
+    margin-top: 40px;
+}
+
+.title {
+    font-size: 44px;
+    margin-right: 100px;
+}
+
+.closeIcon {
+    margin-left: 100px;
+}
+
+
+.image {
+    width: 100%;
+    height: auto;
+}
+
+.name {
+    margin-top: 16px;
+    margin-bottom: 24px;
+}
