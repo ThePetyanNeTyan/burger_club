@@ -4,6 +4,7 @@ import styles from './BurgerConstructor.module.css';
 import { useState, useMemo } from 'react';
 import { Modal } from '../Modal/Modal';
 import { OrderDetails } from '../OrderDetails/OrderDetails';
+import PropTypes from 'prop-types';
 
 function BurgerConstructor(props) {
 
@@ -18,10 +19,10 @@ function BurgerConstructor(props) {
     return total;
   }, [props.ingredients]);
 
-
-  const bunIngredients = useMemo(() => {
-    return props.ingredients.filter((item) => item.type === 'bun');
-  }, [props.ingredients]);
+  const bunIngredients = [];
+  bunIngredients.push(props.ingredients[0]);
+  bunIngredients.push(...props.ingredients.filter(x => x.type !== "bun"));
+  bunIngredients.push(props.ingredients[0]);
 
 
   function handleOrderClick() {
@@ -39,9 +40,9 @@ function BurgerConstructor(props) {
       <div className={styles.container}>
         {bunIngredients.map((item, index) => (
           <div key={item._id} className={styles.container}>
-            <div className={styles.box1} >
+            {item.type !== "bun" ? <div className={styles.box1} >
               <DragIcon type="primary" />
-            </div>
+            </div> : " "}
             <div className={styles.box2}>
               <ConstructorElement
                 text={item.name + (index === 0 ? '(верх)' : index === bunIngredients.length - 1 ? '(низ)' : " ")}
@@ -68,7 +69,7 @@ function BurgerConstructor(props) {
         </p>
       </div>
       {isModalVisible &&
-        <div style={{ overflow: 'hidden' }}>
+        <div>
           {
             <Modal header="Внимание!" onClose={handleOrderClose} >
               <OrderDetails />
@@ -80,5 +81,17 @@ function BurgerConstructor(props) {
   );
 
 }
+
+BurgerConstructor.propTypes = {
+  ingredients: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      type: PropTypes.string.isRequired,
+      price: PropTypes.number.isRequired,
+      image_mobile: PropTypes.string.isRequired
+    })
+  ).isRequired
+};
 
 export default BurgerConstructor;

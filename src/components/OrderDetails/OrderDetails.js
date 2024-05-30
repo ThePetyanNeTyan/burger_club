@@ -15,7 +15,7 @@ export function OrderDetails() {
             <p className=" text text_type_main-medium">
                 идентификатор заказа
             </p>
-            <img src={doneImage} className='pt-14 pb-14' alt="" />
+            <img src={doneImage} className='pt-14 pb-14' alt="имя картинки" />
             <p className="text text_type_main-default pb-2">
                 Ваш заказ начали готовить
             </p>
