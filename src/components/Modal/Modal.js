@@ -22,8 +22,8 @@ export function Modal({ onClose, children }) {
 
   return ReactDOM.createPortal(
       <ModalOverlay onClose={onClose}>
-          <div className={styles.main} onClick={(evt) => evt.stopPropagation()}>
-              {React.cloneElement(children, { close: onClose })}
+          <div className={styles.main}>
+              {React.cloneElement(children, { onClose })}
           </div>
       </ModalOverlay>,
       modalRoot

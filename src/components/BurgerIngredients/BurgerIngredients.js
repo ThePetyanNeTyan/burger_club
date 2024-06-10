@@ -129,7 +129,7 @@ function BurgerIngredients(props) {
         <div style={{ overflow: 'hidden' }}>
           {
             <Modal header="Внимание!" onClose={handleIngredientClose} >
-              <IngredientDetail props={ingredient} />
+              <IngredientDetail ingredient={ingredient} onClose={handleIngredientClose} />
             </Modal>
           }
         </div>
