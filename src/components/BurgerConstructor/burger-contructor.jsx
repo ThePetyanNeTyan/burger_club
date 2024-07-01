@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { Button } from "@ya.praktikum/react-developer-burger-ui-components";
-import styles from "./burger-contructor.module.css";
-import Cost from "./cost/cost";
 import { useDispatch, useSelector } from "react-redux";
 import { useDrop } from "react-dnd";
-import { SelectedBun } from "./selected-bun/selected-bun";
-import { SelectedIngredient } from "./selected-ingredient/selected-ingredient";
+import { useNavigate } from "react-router";
+import styles from "./burger-contructor.module.css";
+import Cost from "./cost/cost";
+import Modal from "../Modal/modal";
+import OrderDetails from "../OrderDetails/order-details";
 import {
   calcTotalPrice,
   resetConstructor,
@@ -13,13 +14,15 @@ import {
   addIngredient,
 } from "../services/slices/burger-constructor/burger-constructor";
 import { handleAndPlaceOrder } from "../services/slices/order-post-slice/order-post";
-import Modal from "../Modal/modal";
-import OrderDetails from "../OrderDetails/order-details";
+import { ROUTE } from "../utils/constants";
+import { SelectedIngredient } from "./selected-ingredient/selected-ingredient";
+import { SelectedBun } from "./selected-bun/selected-bun";
 
-export default function BurgerConstructor() {
+const BurgerConstructor = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const data = useSelector((store) => store.ingredients.ingredients);
-  
   const selectedBun = useSelector(
     (store) => store.burgerConstructor.selectedBun
   );
@@ -28,6 +31,8 @@ export default function BurgerConstructor() {
   );
   const orderList = useSelector((store) => store.postOrder.orderList);
   const postRequest = useSelector((store) => store.postOrder.postRequest);
+  const user = useSelector((store) => store.user.user);
+  const totalPrice = useSelector((store) => store.burgerConstructor.totalPrice);
 
   const [showModal, setShowModal] = useState(false);
 
@@ -50,21 +55,25 @@ export default function BurgerConstructor() {
     dispatch(calcTotalPrice());
   }, [dispatch, selectedBun, selectedIngredients]);
 
-  const totalPrice = useSelector((store) => store.burgerConstructor.totalPrice);
-
   const handlePostOrder = () => {
-    const order = [selectedBun, ...selectedIngredients];
-    dispatch(handleAndPlaceOrder(order));
-    setShowModal(true);
+    if (user) {
+      const order = [selectedBun, ...selectedIngredients];
+      dispatch(handleAndPlaceOrder(order));
+      setShowModal(true);
+    } else {
+      navigate(ROUTE.mainLayout.login);
+    }
   };
 
-  const onModalClosed = () => {
+  const handleCloseOrderModal = () => {
+    dispatch(resetConstructor());
     setShowModal(false);
   };
-  
+
   if (data.length === 0) {
     return null;
   }
+
   return (
     <>
       <div ref={dropRef}>
@@ -87,9 +96,8 @@ export default function BurgerConstructor() {
             </ul>
           ) : (
             <div
-              className={`${styles.constructorElement} ${
-                isHover && ingredientType !== "bun" && styles.borderClass
-              } `}
+              className={`${styles.constructorElement} ${isHover && ingredientType !== "bun" && styles.borderClass
+                }`}
             >
               <p className="text text_type_main-medium">Выберите начинку</p>
             </div>
@@ -103,7 +111,7 @@ export default function BurgerConstructor() {
         />
       </div>
       <div className={styles.cost_block}>
-      <Cost cost={totalPrice} />
+        <Cost cost={totalPrice} />
         <Button
           htmlType="button"
           type="primary"
@@ -119,16 +127,13 @@ export default function BurgerConstructor() {
       ) : (
         showModal &&
         orderList && (
-          <Modal
-            isOpen={showModal}
-            setIsModalOpen={onModalClosed}
-            width={720}
-            height={718}
-          >
+          <Modal onClose={handleCloseOrderModal}>
             <OrderDetails orderNumber={orderList.order.number} />
           </Modal>
         )
       )}
     </>
   );
-}
+};
+
+export default BurgerConstructor;
