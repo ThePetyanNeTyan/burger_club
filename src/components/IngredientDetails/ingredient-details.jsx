@@ -1,5 +1,4 @@
 import { useParams } from "react-router-dom";
-import ingredientsPropTypes from "../utils/types";
 import styles from "./ingredient-details.module.css";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useCallback } from "react";
