@@ -16,7 +16,7 @@ type TProfileInfo = {
 };
 
 export const ProfileInfo: FC = () => {
-    const { formState, onChange, setFormState, onSubmit } = useForm < TProfileInfo > (
+    const { formState, onChange, setFormState, onSubmit } = useForm<TProfileInfo>(
         {
             name: "",
             email: "",
