@@ -72,7 +72,7 @@ export const socketMiddleware =
                 if (wsConnect.match(action)) {
                     socket = new WebSocket(action.payload);
                     if (socket) {
-                        handleWebSocketEvent(socket, dispatch, wsOptions); // Передаем полный wsOptions
+                        handleWebSocketEvent(socket, dispatch, wsOptions);
                     }
                 }
 

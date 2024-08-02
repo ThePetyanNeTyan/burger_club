@@ -20,59 +20,17 @@ export const OrderInfo: FC = () => {
 
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 
-    const isInteger = (value: string): boolean => /^\d+$/.test(value);
-
     useEffect(() => {
         if (!number) {
             return;
         }
 
-        const handleWebSocketMessage = (event: MessageEvent) => {
-            const data = JSON.parse(event.data);
-            if (data.success && data.orders && data.orders.length > 0) {
-                const order = data.orders.find((order: IOrder) => order._id === number);
-                if (order) {
-                    setCurrentOrder(order);
-                }
-            }
-        };
+        dispatch(wsOrdersConnect(WEBSOCKET_API.baseUrl + WEBSOCKET_API.endpoints.allOrders));
 
-        const fetchOrder = async () => {
-            if (isInteger(number)) {
-                const url = `${API.baseUrl}${API.endpoints.order}/${number}`;
-                try {
-                    const response = await fetch(url);
-                    const data = await response.json();
-                    if (data.success && data.orders && data.orders.length > 0) {
-                        setCurrentOrder(data.orders[0]);
-                    }
-                } catch (error) {
-                    console.error("Ошибка при загрузке заказа:", error);
-                }
-            } else {
-                dispatch(wsOrdersConnect(WEBSOCKET_API.baseUrl + WEBSOCKET_API.endpoints.allOrders));
-
-                const ws = new WebSocket(WEBSOCKET_API.baseUrl + WEBSOCKET_API.endpoints.allOrders);
-                ws.onopen = () => {
-                    ws.send(JSON.stringify({ action: "getOrder", orderId: number }));
-                };
-                ws.onmessage = handleWebSocketMessage;
-                ws.onerror = (error) => console.error("WebSocket error:", error);
-
-                return () => {
-                    ws.close();
-                    dispatch(wsOrdersDisconnect());
-                };
-            }
-        };
-
-        fetchOrder();
         return () => {
-            if (!isInteger(number) && wsConnected) {
-                dispatch(wsOrdersDisconnect());
-            }
+            dispatch(wsOrdersDisconnect());
         };
-    }, [number, dispatch, wsConnected]);
+    }, [number, dispatch]);
 
     const orders = [...userOrder, ...feedOrder];
     const order = orders.find((item) => item._id === number) || currentOrder;
