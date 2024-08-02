@@ -1,42 +1,81 @@
-import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router";
+import { FC, useEffect, useState } from "react";
+import { useParams } from "react-router";
+import { useDispatch, useSelector } from "react-redux";
 import styles from "./order-info.module.css";
-import { FC } from "react";
 import cn from "classnames";
 import { FormattedDate } from "@ya.praktikum/react-developer-burger-ui-components";
 import { CurrencyIcon } from "@ya.praktikum/react-developer-burger-ui-components";
 import { IOrder } from "../types/ingredient-types";
-import { API, ORDER_STATUS } from "../utils/constants";
+import { API, ORDER_STATUS, WEBSOCKET_API } from "../utils/constants";
 import { RootState } from "../services/store/store";
-import { useSelectorHook } from "../services/store/hooks";
+import { wsOrdersConnect, wsOrdersDisconnect } from "../services/slices/feed-orders/feed-orders";
 
 export const OrderInfo: FC = () => {
     const { number } = useParams<{ number: string }>();
-    const feedOrder = useSelectorHook((state) => state.feedOrders.orders);
-    const userOrder = useSelectorHook((state) => state.userOrders.orders);
-    const ingredients = useSelectorHook((state) => state.ingredients.ingredients);
+    const dispatch = useDispatch();
+    const feedOrder = useSelector((state: RootState) => state.feedOrders.orders);
+    const userOrder = useSelector((state: RootState) => state.userOrders.orders);
+    const ingredients = useSelector((state: RootState) => state.ingredients.ingredients);
+    const wsConnected = useSelector((state: RootState) => state.feedOrders.wsConnected);
 
     const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
 
-    useEffect(() => {
-        if (feedOrder.length > 0) return;
+    const isInteger = (value: string): boolean => /^\d+$/.test(value);
 
-        const url = `${API.baseUrl}${API.endpoints.order}/${number}`;
-        fetch(url)
-            .then((response) => response.json())
-            .then((data) => {
-                if (data.success && data.orders && data.orders.length > 0) {
-                    setCurrentOrder(data.orders[0]);
+    useEffect(() => {
+        if (!number) {
+            return;
+        }
+
+        const handleWebSocketMessage = (event: MessageEvent) => {
+            const data = JSON.parse(event.data);
+            if (data.success && data.orders && data.orders.length > 0) {
+                const order = data.orders.find((order: IOrder) => order._id === number);
+                if (order) {
+                    setCurrentOrder(order);
                 }
-            })
-            .catch((error) => {
-                console.error("Ошибка при загрузке заказа:", error);
-            });
-    }, [number, feedOrder]);
+            }
+        };
+
+        const fetchOrder = async () => {
+            if (isInteger(number)) {
+                const url = `${API.baseUrl}${API.endpoints.order}/${number}`;
+                try {
+                    const response = await fetch(url);
+                    const data = await response.json();
+                    if (data.success && data.orders && data.orders.length > 0) {
+                        setCurrentOrder(data.orders[0]);
+                    }
+                } catch (error) {
+                    console.error("Ошибка при загрузке заказа:", error);
+                }
+            } else {
+                dispatch(wsOrdersConnect(WEBSOCKET_API.baseUrl + WEBSOCKET_API.endpoints.allOrders));
+
+                const ws = new WebSocket(WEBSOCKET_API.baseUrl + WEBSOCKET_API.endpoints.allOrders);
+                ws.onopen = () => {
+                    ws.send(JSON.stringify({ action: "getOrder", orderId: number }));
+                };
+                ws.onmessage = handleWebSocketMessage;
+                ws.onerror = (error) => console.error("WebSocket error:", error);
+
+                return () => {
+                    ws.close();
+                    dispatch(wsOrdersDisconnect());
+                };
+            }
+        };
+
+        fetchOrder();
+        return () => {
+            if (!isInteger(number) && wsConnected) {
+                dispatch(wsOrdersDisconnect());
+            }
+        };
+    }, [number, dispatch, wsConnected]);
 
     const orders = [...userOrder, ...feedOrder];
     const order = orders.find((item) => item._id === number) || currentOrder;
-
     if (!order) {
         return <p className="text text_type_main-default">Загрузка...</p>;
     }
