@@ -14,7 +14,7 @@ import { Form } from "../../Form/form";
 import { userLogin } from "../../services/slices/user-slice/auth";
 
 export const Login: FC = () => {
-    const { formState, onChange } = useForm < IUserLogin > ({
+    const { formState, onChange } = useForm<IUserLogin>({
         email: "",
         password: "",
     });

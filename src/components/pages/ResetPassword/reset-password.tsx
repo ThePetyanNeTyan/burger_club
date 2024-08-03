@@ -13,12 +13,12 @@ import { ForgotLinks } from "../../Form/form-links/form-links";
 import { IUserResetPassword } from "../../types/user-types";
 
 export const ResetPassword = () => {
-    const { formState, onChange } = useForm < IUserResetPassword > ({
+    const { formState, onChange } = useForm<IUserResetPassword>({
         token: "",
         password: "",
     });
     const navigate = useNavigate();
-    const [requestError, setRequestError] = useState < boolean > (false);
+    const [requestError, setRequestError] = useState<boolean>(false);
     const forgotSuccess: string | null = localStorage.getItem("forgotSuccess");
 
     const handleReset = (e: FormEvent<HTMLFormElement>) => {
