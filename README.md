@@ -1,1 +1,1 @@
-https://thepetyannetyan.github.io/index.html
+https://thepetyannetyan.github.io/
