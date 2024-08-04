@@ -1,1 +1,1 @@
-https://thepetyannetyan.github.io/
+https://thepetyannetyan.github.io/burger_club/
